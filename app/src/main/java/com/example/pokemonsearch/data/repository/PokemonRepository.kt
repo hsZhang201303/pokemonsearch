@@ -1,9 +1,7 @@
 package com.example.pokemonsearch.data.repository
 
-import com.example.pokemonsearch.data.model.Pokemon
 import com.example.pokemonsearch.data.model.PokemonData
 import com.example.pokemonsearch.data.model.SpecieData
-import com.example.pokemonsearch.data.model.PokemonSpecie
 import com.example.pokemonsearch.data.remote.PokemonApi
 
 class PokemonRepository(private val api: PokemonApi) {

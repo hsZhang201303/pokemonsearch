@@ -5,17 +5,32 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# --- OkHttp rules ---
+# OkHttp 5.x and Okio have built-in R8 rules, so only basic rules are needed if using ProGuard.
+-keepattributes Signature, AnnotationDefault, EnclosingMethod, InnerClasses
+-dontwarn okhttp3.**
+-dontwarn okio.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# --- Kotlin Serialization rules ---
+# Keep serializable classes and their properties
+-keepattributes *Annotation*, InnerClasses
+-keep @kotlinx.serialization.Serializable class * { *; }
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName <fields>;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# --- Data Models (Specific for this project) ---
+-keep class com.example.pokemonsearch.data.model.** { *; }
+
+# --- Koin rules ---
+# Koin usually doesn't need broad keep rules in modern R8.
+# Keep only necessary parts if using reflection.
+-dontwarn org.koin.**
+
+# --- Glide rules ---
+-keep public class * extends com.bumptech.glide.module.AppGlideModule { *; }
+-keep public class * extends com.bumptech.glide.module.LibraryGlideModule { *; }
+# Removed explicit references to GeneratedAppGlideModuleImpl and GeneratedLibraryGlideModuleImpl
+# because they are generated at compile time and cause IDE errors.
+# The following rule is sufficient for most cases.
+-dontwarn com.bumptech.glide.**

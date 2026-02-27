@@ -1,8 +1,6 @@
 package com.example.pokemonsearch.ui.detail
 
-import com.example.pokemonsearch.data.model.Pokemon
 import com.example.pokemonsearch.data.model.PokemonData
-import kotlinx.coroutines.flow.StateFlow
 
 data class DetailState(
     val isLoading: Boolean = true,

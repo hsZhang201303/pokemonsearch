@@ -1,7 +1,6 @@
 package com.example.pokemonsearch.ui.home
 
 import com.example.pokemonsearch.data.model.PokemonSpecie
-import kotlinx.coroutines.flow.StateFlow
 
 // 1. State: UI 的完整快照
 data class HomeState(

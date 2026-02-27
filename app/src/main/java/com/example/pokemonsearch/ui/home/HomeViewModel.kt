@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: PokemonRepository) : ViewModel() {
-
+    private val defaultPageSize = 20
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
@@ -67,7 +67,7 @@ class HomeViewModel(private val repository: PokemonRepository) : ViewModel() {
                         isLoadingMore = false,
                         species = newList,
                         page = page,
-                        hasMore = data.species.size >= 20,
+                        hasMore = data.species.size >= defaultPageSize,
                         error = null
                     )
                 }
@@ -82,5 +82,11 @@ class HomeViewModel(private val repository: PokemonRepository) : ViewModel() {
                 _effect.send(HomeEffect.ShowToast(error.message ?: "Unknown Error"))
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // 关闭Channel防⽌内存泄漏
+        _effect.close()
     }
 }
