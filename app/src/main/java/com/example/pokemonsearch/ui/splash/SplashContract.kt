@@ -1,6 +1,5 @@
 package com.example.pokemonsearch.ui.splash
 
-import kotlinx.coroutines.flow.StateFlow
 
 data class SplashState(
     val isLoading: Boolean = true,

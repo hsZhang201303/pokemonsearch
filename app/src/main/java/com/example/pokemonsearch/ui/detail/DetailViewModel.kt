@@ -35,9 +35,9 @@ class DetailViewModel(
 
             repository.getDetail(pokemonId)
                 .onSuccess { pokemons ->
-                    if (pokemons != null) {
-                        _state.update { it.copy(isLoading = false, pokemons = pokemons) }
-                    } else {
+                    pokemons?.let { data ->
+                        _state.update { it.copy(isLoading = false, pokemons = data) }
+                    } ?: run {
                         _state.update { it.copy(isLoading = false, error = "Pokemon not found") }
                     }
                 }

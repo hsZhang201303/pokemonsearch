@@ -7,7 +7,6 @@ import com.example.pokemonsearch.data.repository.PokemonRepository
 import com.example.pokemonsearch.ui.detail.DetailViewModel
 import com.example.pokemonsearch.ui.home.HomeViewModel
 import com.example.pokemonsearch.ui.splash.SplashViewModel
-import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -25,16 +24,10 @@ val appModule = module {
 
     // Network
     single {
-        // 实际生产环境, 需要将其替换为目标服务器真实的证书公钥哈希值
-//        val certificatePinner = CertificatePinner.Builder()
-//            .add("beta.pokeapi.co", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-//            .build()
-
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
-//            .certificatePinner(certificatePinner)
             .connectTimeout(15, TimeUnit.SECONDS)  // 连接超时
             .readTimeout(30, TimeUnit.SECONDS)     // 读取超时
             .writeTimeout(30, TimeUnit.SECONDS)     // 写⼊超时

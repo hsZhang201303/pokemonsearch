@@ -20,13 +20,17 @@ class PokemonApi(private val client: OkHttpClient) {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
 
-    // 搜索列表 Query
-    private fun buildSearchQuery(name: String, limit: Int, offset: Int): String {
-        // 防注入
-        val sanitizedName = name
+    private fun sanitizeInput(input: String): String {
+        return input
             .replace(Regex("[\"';]"), "") // 移除潜在的注⼊字符
             .replace(Regex("[\\r\\n]"), "") // 移除换⾏符
             .take(50)
+    }
+
+    // 搜索列表 Query
+    private fun buildSearchQuery(name: String, limit: Int, offset: Int): String {
+        // 防注入
+        val sanitizedName = sanitizeInput(name)
 
         return """
             query {
