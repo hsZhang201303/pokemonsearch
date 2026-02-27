@@ -54,11 +54,7 @@ dependencies {
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.bundles.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -80,22 +76,17 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // DI (Koin)
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
+    implementation(libs.bundles.koin)
 
     // DataStore
     implementation(libs.androidx.datastore)
 
-    // Local Unit Tests (JUnit 4, MockK, Coroutines Test)
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
+    // Local Unit Tests
+    testImplementation(libs.bundles.testing)
 
-    // Instrumented Tests (UI Tests)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
+    // Instrumented Tests
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.bundles.android.testing)
     // 在 Android 设备上运行 MockK 所需的依赖
     androidTestImplementation(libs.mockk.android)
 
