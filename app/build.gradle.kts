@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.compose)
@@ -24,7 +23,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -35,6 +35,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     buildFeatures {
         compose = true
     }
@@ -85,13 +86,24 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore)
 
+    // Local Unit Tests (JUnit 4, MockK, Coroutines Test)
     testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Instrumented Tests (UI Tests)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    // 在 Android 设备上运行 MockK 所需的依赖
+    androidTestImplementation(libs.mockk.android)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // performance
+    implementation(libs.androidx.compose.runtime.tracing)
+    // security
+    implementation(libs.androidx.security.crypto)
 }

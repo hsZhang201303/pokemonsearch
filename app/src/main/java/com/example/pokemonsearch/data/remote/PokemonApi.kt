@@ -1,10 +1,10 @@
 package com.example.pokemonsearch.data.remote
 
-import android.util.Log
 import com.example.pokemonsearch.data.model.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,10 +22,16 @@ class PokemonApi(private val client: OkHttpClient) {
 
     // 搜索列表 Query
     private fun buildSearchQuery(name: String, limit: Int, offset: Int): String {
+        // 防注入
+        val sanitizedName = name
+            .replace(Regex("[\"';]"), "") // 移除潜在的注⼊字符
+            .replace(Regex("[\\r\\n]"), "") // 移除换⾏符
+            .take(50)
+
         return """
             query {
                 pokemon_v2_pokemonspecies(
-                    where: { name: { _like: "%$name%" } }
+                    where: { name: { _like: "%$sanitizedName%" } }
                     limit: $limit
                     offset: $offset
                     order_by: { id: asc }
@@ -66,15 +72,32 @@ class PokemonApi(private val client: OkHttpClient) {
     suspend fun searchSpecies(name: String, page: Int, pageSize: Int): Result<SpecieData> {
         val offset = (page - 1) * pageSize
         val query = buildSearchQuery(name, pageSize, offset)
-        return executeQuery(query)
+        return executeQuery(query) { responseBody ->
+            val parsed = json.decodeFromString<GraphQLResponse>(responseBody)
+            parsed.errors?.firstOrNull()?.let { error ->
+                Result.failure(Exception(error.message))
+            } ?: parsed.data?.let { data ->
+                Result.success(data)
+            } ?: Result.failure(Exception("Empty data"))
+        }
     }
 
     suspend fun getPokemonDetail(id: Int): Result<PokemonData?> {
         val query = buildDetailQuery(id)
-        return executeQuery<PokemonData>(query, true)
+        return executeQuery(query) { responseBody ->
+            val parsed = json.decodeFromString<GraphQLDetailResponse>(responseBody)
+            parsed.errors?.firstOrNull()?.let { error ->
+                Result.failure(Exception(error.message))
+            } ?: parsed.data?.let { data ->
+                Result.success(data)
+            } ?: Result.failure(Exception("Empty data"))
+        }
     }
 
-    private suspend inline fun <reified T> executeQuery(queryStr: String, isDetail: Boolean = false): Result<T> {
+    private suspend fun <T> executeQuery(
+        queryStr: String,
+        transform: (String) -> Result<T>
+    ): Result<T> {
         val body = """{"query":"${queryStr.replace("\"", "\\\"").replace("\n", "\\n")}"}"""
             .toRequestBody(JSON_TYPE)
 
@@ -84,30 +107,19 @@ class PokemonApi(private val client: OkHttpClient) {
             try {
                 val response = client.newCall(request).execute()
                 if (!response.isSuccessful) {
-                    Result.failure<T>(Exception("HTTP ${response.code}"))
+                    Result.failure(Exception("HTTP ${response.code}"))
                 } else {
-                    val responseBody = response.body?.string() ?: ""
-
-                    if (isDetail) {
-                        val parsed = json.decodeFromString<GraphQLDetailResponse>(responseBody)
-                        parsed.errors?.firstOrNull()?.let { error ->
-                            Result.failure<T>(Exception(error.message))
-                        } ?: parsed.data?.let { data ->
-                            @Suppress("UNCHECKED_CAST")
-                            Result.success(data as T)
-                        } ?: Result.failure<T>(Exception("Empty data"))
-                    } else {
-                        val parsed = json.decodeFromString<GraphQLResponse>(responseBody)
-                        parsed.errors?.firstOrNull()?.let { error ->
-                            Result.failure<T>(Exception(error.message))
-                        } ?: parsed.data?.let { data ->
-                            @Suppress("UNCHECKED_CAST")
-                            Result.success(data as T)
-                        } ?: Result.failure<T>(Exception("Empty data"))
-                    }
+                    val responseBody = response.body.string()
+                    transform(responseBody)
                 }
+            } catch (e: IOException) {
+                Result.failure(Exception("Network error: ${e.message}"))
+            } catch (e: SerializationException) {
+                Result.failure(Exception("Data parsing error: ${e.message}"))
+            } catch (e: TimeoutCancellationException) {
+                Result.failure(Exception("Request timeout"))
             } catch (e: Exception) {
-                Result.failure<T>(e)
+                Result.failure(Exception("Unexpected error: ${e.message}"))
             }
         }
     }
