@@ -1,11 +1,9 @@
 package com.example.pokemonsearch.ui.splash
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,11 +12,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-class SplashViewModel(private val context: Context) : ViewModel() {
+class SplashViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
     private val _state = MutableStateFlow(SplashState())
     val state = _state.asStateFlow()
+
+    companion object {
+        private val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
+    }
 
     init {
         checkFirstLaunch()
@@ -26,14 +26,12 @@ class SplashViewModel(private val context: Context) : ViewModel() {
 
     private fun checkFirstLaunch() {
         viewModelScope.launch {
-            val key = booleanPreferencesKey("is_first_launch")
-            val isFirst = context.dataStore.data.map { it[key] ?: true }.first()
+            val isFirst = dataStore.data.map { it[IS_FIRST_LAUNCH] ?: true }.first()
 
             if (isFirst) {
                 _state.value = SplashState(isLoading = false, showWelcome = true)
             } else {
                 _state.value = SplashState(isLoading = false, showWelcome = false)
-                // 自动导航逻辑在 View 层处理
             }
         }
     }
@@ -42,7 +40,7 @@ class SplashViewModel(private val context: Context) : ViewModel() {
         when (intent) {
             is SplashIntent.DismissWelcome -> {
                 viewModelScope.launch {
-                    context.dataStore.edit { it[booleanPreferencesKey("is_first_launch")] = false }
+                    dataStore.edit { it[IS_FIRST_LAUNCH] = false }
                     _state.value = _state.value.copy(showWelcome = false)
                 }
             }

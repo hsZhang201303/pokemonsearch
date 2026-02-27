@@ -17,7 +17,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.example.pokemonsearch.R
 import com.example.pokemonsearch.ui.theme.LocalDimens
 import com.example.pokemonsearch.data.model.PokemonSpecie
 import com.example.pokemonsearch.ui.theme.parsePokemonColor
@@ -169,7 +171,7 @@ fun PokemonList(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "共 $curPage 页，数据加载完毕",
+                        text = stringResource(id = R.string.load_complete, curPage),
                         color = Color.Gray,
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize
                     )

@@ -1,13 +1,11 @@
 package com.example.pokemonsearch.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pokemonsearch.data.repository.PokemonRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 class HomeViewModel(private val repository: PokemonRepository) : ViewModel() {
 

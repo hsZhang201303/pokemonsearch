@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">pokemonsearch</string>
+    <string name="load_complete">共%1$d⻚，数据加载完毕</string>
 </resources>
