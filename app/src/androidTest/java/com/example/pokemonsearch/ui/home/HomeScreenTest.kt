@@ -42,7 +42,7 @@ class HomeScreenTest {
 
         composeTestRule.setContent {
             PokemonsearchTheme {
-                // 您可能需要模拟 ViewModel 的状态来显示加载指示器
+                // 可能需要模拟 ViewModel 的状态来显示加载指示器
             }
         }
     }
